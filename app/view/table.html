@@ -1,0 +1,21 @@
+<table class="table table-striped">
+  <tr>
+    <?php foreach ($table['headers'] as $header): ?>
+    <th><?php print $header; ?></th>
+    <?php endforeach; ?>
+  </tr>
+
+  <?php foreach ($table as $title => $row): ?>
+  <tr>
+
+    <?php
+    if ($title == 'headers') {
+      continue;
+    }
+
+    foreach ($row as $value): ?>
+    <td> <?php print $value; ?></td>
+    <?php endforeach; ?>
+  </tr>
+  <?php endforeach; ?>
+</table>
