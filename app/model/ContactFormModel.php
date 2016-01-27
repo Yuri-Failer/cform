@@ -1,7 +1,30 @@
 <?php
 
 class ContactFormModel {
-  private $csv = 'contact_form.csv';
+  private $csv = 'contact_form.csv'; //
+  private $db = Database::getInstance();
+
+  /**
+   * Add data to database.
+   * @param $csv
+   *  array rows form CSV.
+   */
+  public function addToDB($csv) {
+    $mysqli = $this->db->getConnection();
+    var_dump($csv);
+    foreach($csv as $row) {
+      foreach($row as $value){
+        $sql_query = "SELECT foo FROM .....";
+        $result = $mysqli->query($sql_query);
+      }
+    }
+  }
+
+  /**
+   * Add line to csv file, create file if the file doesn't exist.
+   * @param $fields
+   *  The form fields.
+   */
 
   public function addToCSV($fields){
     if (file_exists($this->csv)) {
@@ -20,10 +43,13 @@ class ContactFormModel {
   }
 
   /**
+   * Get array data from CSV file.
+   *
    * return array lines.
    */
   public function getCsv() {
     $result = array();
+    // todo: move to var file name. to settings
     if (file_exists('contact_form.csv')) {
 
       if (($csvfile = fopen("contact_form.csv", "r")) !== FALSE) {
@@ -37,7 +63,6 @@ class ContactFormModel {
           else {
             $result[$row] = array_combine($result['headers'], $data);
           }
-
           $row++;
         }
         fclose($csvfile);

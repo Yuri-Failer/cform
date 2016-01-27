@@ -15,6 +15,7 @@ class Route {
 
     // Add model, controller,  hardcoded.
     require_once 'app/model/ContactFormModel.php';
+    require_once 'app/model/Database.php';
     require_once 'app/controller/ContactFormController.php';
     require_once 'app/view/View.php';
 
