@@ -1,7 +1,13 @@
 <table class="table table-striped">
   <tr>
-    <?php foreach ($table['headers'] as $header): ?>
+    <?php foreach ($headers as $header): ?>
     <th><?php print $header; ?></th>
+    <?php endforeach; ?>
+  </tr>
+
+  <tr>
+    <?php foreach ($headers as $header): ?>
+      <td><input type="text" name="find-<?php print $header; ?>" ></td>
     <?php endforeach; ?>
   </tr>
 

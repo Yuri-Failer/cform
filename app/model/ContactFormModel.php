@@ -2,30 +2,63 @@
 
 class ContactFormModel {
   private $csv = 'contact_form.csv'; //
-  private $db = Database::getInstance();
+  private $mysqli;
+  private $tableName = 'contact_form';
+
+  public function __construct(){
+    $db = Database::getInstance();
+    $this->mysqli = $db->getConnection();
+  }
 
   /**
    * Add data to database.
+   *
    * @param $csv
-   *  array rows form CSV.
+   *   Array rows form CSV.
+   * @return array Array with an error message or null.
+   *   Array with an error message or null.
    */
   public function addToDB($csv) {
-    $mysqli = $this->db->getConnection();
-    var_dump($csv);
+    unset($csv['headers']);
+
     foreach($csv as $row) {
-      foreach($row as $value){
-        $sql_query = "SELECT foo FROM .....";
-        $result = $mysqli->query($sql_query);
+
+      $sql_fields = implode(', ',array_keys($row));
+      $values = array();
+      foreach($row as $value) {
+        $values[] = "'" . $this->mysqli->real_escape_string($value) . "'";
       }
+      $sql_values = implode(', ', $values);
+      $sql_query = "INSERT INTO $this->tableName ($sql_fields) VALUES ($sql_values)";
+      $result = $this->mysqli->query($sql_query);
+      if (!$result) {
+        return array('error' => 'The sql query "' . $sql_query . '" failed');
+      }
+    }
+  }
+
+  /**
+   * Get all data from current table.
+   * @param $table
+   *   String. Table name.
+   * @return array
+   *   Result array or null.
+   */
+  public function getDataFromDb($table) {
+    $sql_query = "SELECT * FROM $table";
+    $result = $this->mysqli->query($sql_query);
+    if ($result->num_rows > 0) {
+      while(($resultArray[] = $result->fetch_assoc())|| array_pop($resultArray));
+      $result->free();
+      return $resultArray;
     }
   }
 
   /**
    * Add line to csv file, create file if the file doesn't exist.
    * @param $fields
-   *  The form fields.
+   *   The form fields.
    */
-
   public function addToCSV($fields){
     if (file_exists($this->csv)) {
       $csvfile = fopen($this->csv, 'a');
@@ -49,10 +82,9 @@ class ContactFormModel {
    */
   public function getCsv() {
     $result = array();
-    // todo: move to var file name. to settings
-    if (file_exists('contact_form.csv')) {
+    if (file_exists($this->csv)) {
 
-      if (($csvfile = fopen("contact_form.csv", "r")) !== FALSE) {
+      if (($csvfile = fopen($this->csv, "r")) !== FALSE) {
         $row = 0;
         while (($data = fgetcsv($csvfile, 1000, ",")) !== FALSE) {
           if ($row == 0) {
@@ -69,5 +101,25 @@ class ContactFormModel {
       }
     }
     return $result;
+  }
+
+  /**
+   * @param $fields
+   *  Array for filter.
+   * @return mixed
+   *  Array of safe data.
+   */
+  public function filterData($fields) {
+    $safe_fields = array();
+    foreach ($fields as $key => $field) {
+
+      if($key == 'email') {
+        $safe_fields[$key] = filter_var($field, FILTER_SANITIZE_EMAIL);
+      }
+      else {
+        $safe_fields[$key] = strip_tags($field);
+      }
+    }
+    return $safe_fields;
   }
 }

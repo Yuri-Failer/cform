@@ -4,41 +4,54 @@ class ContactFormController {
 
   public $model;
   public $view;
+  private $data;
 
   function __construct() {
-    $this->view = new View();
+    $this->view = new View;
     $this->model = new ContactFormModel;
+    $this->data = array();
   }
-
 
   public function submit() {
 
     $fields = $_POST;
+    if (!array_search('', $fields)) {
+      $fields = $this->model->filterData($fields);
+      $this->model->addToCSV($fields);
+      $this->data['success'] = 'The data added to CSV';
+    }
+    else {
+      $this->data['error'] = "One or more fields are empty";
+    }
 
-    $this->model->addToCSV($fields);
     $this->index();
   }
 
   function index() {
-    $data = array();
-    $csv_data['table'] = $this->model->getCsv();
-    if (!empty($csv_data)) {
-      $data['table'] = $this->view->render('table', $csv_data, TRUE);
+    // Get table from DB.
+    $data['table'] = $this->model->getDataFromDb('contact_form');
+    $data['headers'] = array_keys($data['table'][0]);
+    if (!empty($data['table'])) {
+      $this->data['table'] = $this->view->render('table', $data, TRUE);
     }
 
-    $this->view->render('ContactForm', $data);
+    $this->view->render('ContactForm', $this->data);
   }
 
-  function moveToDatabase(){
+  function csvToDb(){
     $csv_data = $this->model->getCsv();
     $data['message'] = '';
     if(!empty($csv_data)) {
       $result = $this->model->addToDB($csv_data);
-
-      $data['table'] = $this->view->render('table', $csv_data, TRUE);
+      if (isset($result['error'])){
+        $this->data = $result;
+      }
+      else {
+        $this->data['table'] = $this->view->render('table', $csv_data, TRUE);
+      }
     }
 
-    $this->view->render('ContactForm', $data );
+    $this->index();
   }
 
 }

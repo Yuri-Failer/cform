@@ -7,7 +7,6 @@ class View {
     if ($return) {
       if ($data) {
         foreach ($data as $key => $value) {
-          var_dump($key, $value);
           $$key = $value;
         }
       }

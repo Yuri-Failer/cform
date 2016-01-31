@@ -6,14 +6,17 @@
 class Database {
   private $_connection;
   private static $_instance; //The single instance
+  // settings for Mysql.
   private $_host = "localhost";
   private $_username = "root";
   private $_password = "root";
   private $_database = "cform";
-  /*
-  Get an instance of the Database
-  @return Instance
-  */
+
+  /**
+   * Get an instance of the Database.
+   *
+   * @return Instance
+   */
   public static function getInstance() {
     if(!self::$_instance) { // If no instance then make one
       self::$_instance = new self();
